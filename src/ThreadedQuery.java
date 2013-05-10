@@ -12,20 +12,20 @@ import java.util.concurrent.Executors;
 
 public class ThreadedQuery {
     private static final int THREADS = 64;
-    
+
     private final String[]        g_searchTerms;
     private final Queue<Server>   g_servers;
     private final List<String>    g_results;
     private static CountDownLatch g_doneSignal;
     private ExecutorService       g_execSvc = Executors.newFixedThreadPool(THREADS);
-    
+
     public ThreadedQuery(Collection<Server> servers, String[] players) {
         g_searchTerms = players;
         g_servers = new LinkedList<Server>(servers);
         g_results = Collections.synchronizedList(new ArrayList<String>());
         g_doneSignal = new CountDownLatch(servers.size());
     }
-    
+
     public List<String> start() {
         int ammount = g_servers.size();
         System.out.println(ammount);
@@ -40,13 +40,13 @@ public class ThreadedQuery {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        
+
         return g_results;
     }
-    
+
     private class Task implements Runnable {
         private final Server g_server;
-        
+
         public Task(Server server) {
             g_server = server;
         }
@@ -54,7 +54,7 @@ public class ThreadedQuery {
         @Override
         public void run() {
             boolean endEarly = false;
-            
+
             if (g_server == null) { endEarly = true; }
             String players = null;
             if (!endEarly) {
@@ -64,11 +64,12 @@ public class ThreadedQuery {
                     System.out.println("OOPS " + e);
                 }
             }
-            
+
             if (players == null) { endEarly = true; }
+            players = players.toLowerCase();
             if (!endEarly) {
                 for (String s: g_searchTerms) {
-                    if (players.contains(s)) {
+                    if (players.contains(s.toLowerCase())) {
                         g_results.add(s + " could be in:\n" + g_server.getHostname() + "\n\n"
                                 + players + "\n");
                     }

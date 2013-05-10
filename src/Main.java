@@ -12,7 +12,7 @@ public class Main {
     public static final String MASTER_SERVER =
         "http://gstadmin.gamespy.net/masterserver/index.aspx?gamename=arma2oapc&fields=%5Cpassword"
         + "%5Chostname%5C%5Cnumplayers&overridemaster=&filter=";
-    
+
     public static void main(String[] args) {
         System.out.println("USAGE:");
         System.out.println("find A,B,C,...,Z\tSearch for players seperated by commas. Only use "
@@ -23,7 +23,7 @@ public class Main {
         System.out.println("Loading server list.");
         ArrayList<Server> servers = loadServerList();
         System.out.println("Done.");
-        
+
         String line;
         while (!(line = in.nextLine()).equals("exit")) {
             if (line.startsWith("find ")) {
@@ -42,13 +42,14 @@ public class Main {
                 System.out.println("Unknown command.");
             }
         }
+        in.close();
     }
-    
+
     public static ArrayList<Server> loadServerList() {
         URL url;
         InputStream is = null;
         BufferedReader br;
-        
+
         StringBuilder sb = new StringBuilder();
         ArrayList<Server> servers = new ArrayList<Server>();
 
@@ -61,20 +62,21 @@ public class Main {
                 if (sb.toString().startsWith("<tr><td>")) {
                     int temp = sb.indexOf("<tr><td>");
                     sb.delete(temp, temp + 8); // Remove the leading table tags
-                    
+
                     temp = sb.indexOf("</td></tr>");
                     sb.delete(temp, temp + 10); // Remove the trailing table tags
-                    
+
                     temp = sb.indexOf("</td><td></td><td>");
-                    sb.replace(temp, temp + 18, "¤"); // Replace this annoying blank column
-                    
+                    sb.replace(temp, temp + 18, "ï¿½"); // Replace this annoying blank column
+
                     while ((temp = sb.indexOf("</td><td>")) != -1) {
-                        sb.replace(temp, temp + 9, "¤"); // Split up the important columns
+                        sb.replace(temp, temp + 9, "ï¿½"); // Split up the important columns
                     }
                     try {
-                        Server result = Server.createFromStringArray(sb.toString().split("¤"));
-                        if (!result.hasPassword() && result.getHostname().contains("DayZ")
-                                //&& result.getHostname().contains("1.7.1.5")) {
+                        Server result = Server.createFromStringArray(sb.toString().split("ï¿½"));
+                        if (!result.hasPassword()
+                                //&& result.getHostname().contains("DayZ")
+                                //&& result.getHostname().contains("1.7.1.5")
                                 ){
                             servers.add(result);
                         }
@@ -97,5 +99,17 @@ public class Main {
             }
         }
         return servers;
+    }
+
+    public static String bytesToHex(byte[] bytes) {
+        final char[] hexArray = {'0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F'};
+        char[] hexChars = new char[bytes.length * 2];
+        int v;
+        for ( int j = 0; j < bytes.length; j++ ) {
+            v = bytes[j] & 0xFF;
+            hexChars[j * 2] = hexArray[v >>> 4];
+            hexChars[j * 2 + 1] = hexArray[v & 0x0F];
+        }
+        return new String(hexChars);
     }
 }
